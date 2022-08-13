@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+default_text="URY - University Radio York"
+output_device=/dev/null
+
+pid_file=/tmp/radiotext.pid
+last_msg_file=/tmp/radiotext.last
+
+usage () {
+    >&2 echo "$(basename $0) command
+    
+    Commands:
+        - start: start the radiotext daemon
+        - stop: stop the radiotext daemon
+        - now: view what is currently on radiotext
+        - live: follow radiotext updates in real time TODO
+    "
+    exit 1
+}
+
+check_running () {
+    if [[ ! -f $pid_file ]]; then
+        >&2 echo "daemon not running"
+        exit 1
+    fi
+}
+
+output_text () {
+    echo -ne "${@}\f" | tee $output_device $last_msg_file > /dev/null
+}
+
+daemon () {
+    while true; do
+        sleep 30
+        output_text $RANDOM
+    done
+}
+
+start_daemon () {
+    if [[ -f $pid_file ]]; then
+        >&2 echo "daemon already running"
+        exit 1
+    fi
+
+    touch $last_msg_file
+
+    daemon &
+    echo $! > $pid_file
+}
+
+stop_daemon () {
+    kill $(cat $pid_file)
+    rm $pid_file
+    output_text $default_text
+}
+
+main () {
+    [[ $# -ne 1 ]] && usage
+
+    case $1 in
+        "start")
+            start_daemon
+            ;;
+        
+        "stop")
+            check_running
+            stop_daemon
+            ;;
+
+        "now")
+            check_running
+            cat $last_msg_file
+            ;;
+
+        "live")
+            # TODO
+            check_running
+            cat $last_msg_file
+            ;;
+
+        *)
+            usage
+            ;;
+    esac
+}
+
+main ${@}
