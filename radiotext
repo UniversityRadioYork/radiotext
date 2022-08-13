@@ -9,6 +9,8 @@ wait_seconds=10
 pid_file=/tmp/radiotext.pid
 last_msg_file=/tmp/radiotext.last
 messages_file=radiotext.messages
+api_base_url=https://ury.org.uk/api/v2
+api_key_file=.myradio.key
 
 usage () {
     >&2 echo "$(basename $0) command
@@ -33,9 +35,17 @@ output_text () {
     echo -ne "${@}\f" | tee $output_device $last_msg_file > /dev/null
 }
 
+myradio_api_request () {
+    local endpoint=$1
+    # TODO ? or & for api_key
+    # TODO deal with failed auth
+    curl "$api_base_url/$endpoint&api_key=$(cat $api_key_file)" 2>/dev/null | jq .payload
+}
+
 display_messages () {
     output_text $default_text
     sleep $wait_seconds
+
     [[ ! -f $messages_file ]] && return
     while read message; do
         output_text $message
@@ -43,9 +53,17 @@ display_messages () {
     done < $messages_file
 }
 
+now_playing () {
+    # TODO - null track
+    # TODO - split to length
+    output_text "Now Playing: " $(myradio_api_request "track/nowplaying?allowOffAir=true" | jq -r '(.track.title + " - " + .track.artist)')
+    sleep $wait_seconds
+}
+
 daemon () {
     while true; do
         display_messages
+        now_playing
         output_text $RANDOM
         sleep 10
     done
