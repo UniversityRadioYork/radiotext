@@ -4,9 +4,11 @@ set -euo pipefail
 
 default_text="URY - University Radio York"
 output_device=/dev/null
+wait_seconds=10
 
 pid_file=/tmp/radiotext.pid
 last_msg_file=/tmp/radiotext.last
+messages_file=radiotext.messages
 
 usage () {
     >&2 echo "$(basename $0) command
@@ -31,10 +33,21 @@ output_text () {
     echo -ne "${@}\f" | tee $output_device $last_msg_file > /dev/null
 }
 
+display_messages () {
+    output_text $default_text
+    sleep $wait_seconds
+    [[ ! -f $messages_file ]] && return
+    while read message; do
+        output_text $message
+        sleep $wait_seconds
+    done < $messages_file
+}
+
 daemon () {
     while true; do
-        sleep 30
+        display_messages
         output_text $RANDOM
+        sleep 10
     done
 }
 
