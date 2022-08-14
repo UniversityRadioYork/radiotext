@@ -25,10 +25,9 @@ usage () {
 }
 
 check_running () {
-    if [[ ! -f $pid_file ]]; then
-        >&2 echo "daemon not running"
-        exit 1
-    fi
+    [[ -f $pid_file ]] && return
+    >&2 echo "daemon not running"
+    exit 1
 }
 
 output_text () {
@@ -60,12 +59,19 @@ now_playing () {
     sleep $wait_seconds
 }
 
+on_air_show () {
+    # TODO - what if it's jukebox/off air
+    # TODO - split to length
+    # TODO - next show at 10 to the hour?
+    output_text "On Air: " $(myradio_api_request "timeslot/currentandnext?n=1" | jq -r '(.next.title + " with " + .next.presenters)')
+    sleep $wait_seconds
+}
+
 daemon () {
     while true; do
         display_messages
         now_playing
-        output_text $RANDOM
-        sleep 10
+        on_air_show
     done
 }
 
