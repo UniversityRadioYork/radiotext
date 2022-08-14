@@ -5,6 +5,7 @@ set -euo pipefail
 default_text="URY - University Radio York"
 output_device=/dev/null
 wait_seconds=10
+max_msg_length=64
 
 pid_file=/tmp/radiotext.pid
 last_msg_file=/tmp/radiotext.last
@@ -28,6 +29,23 @@ check_running () {
     [[ -f $pid_file ]] && return
     >&2 echo "daemon not running"
     exit 1
+}
+
+split_text_to_length () {
+    local full_msg=${@}
+    local sub_msg=""
+
+    for word in $full_msg; do
+        check_msg="$sub_msg $word"
+        if [[ ${#check_msg} -le $max_msg_length ]]; then
+            sub_msg=$check_msg
+        else
+            echo $sub_msg
+            sub_msg=$word
+        fi
+    done
+
+    echo $sub_msg
 }
 
 output_text () {
@@ -54,17 +72,23 @@ display_messages () {
 
 now_playing () {
     # TODO - null track
-    # TODO - split to length
-    output_text "Now Playing: " $(myradio_api_request "track/nowplaying?allowOffAir=true" | jq -r '(.track.title + " - " + .track.artist)')
-    sleep $wait_seconds
+    now_playing_msg="Now Playing:  $(myradio_api_request "track/nowplaying?allowOffAir=true" | jq -r '(.track.title + " - " + .track.artist)')"
+    
+    while read line; do
+        output_text $line
+        sleep $wait_seconds
+    done < <(split_text_to_length $now_playing_msg)
 }
 
 on_air_show () {
     # TODO - what if it's jukebox/off air
-    # TODO - split to length
     # TODO - next show at 10 to the hour?
-    output_text "On Air: " $(myradio_api_request "timeslot/currentandnext?n=1" | jq -r '(.next.title + " with " + .next.presenters)')
-    sleep $wait_seconds
+    on_air_text="On Air: $(myradio_api_request "timeslot/currentandnext?n=1" | jq -r '(.next.title + " with " + .next.presenters)')"
+
+    while read line; do
+        output_text $line
+        sleep $wait_seconds
+    done < <(split_text_to_length $on_air_text)
 }
 
 daemon () {
