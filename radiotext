@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-default_text="URY - University Radio York"
-output_device=/dev/null
-wait_seconds=10
+default_text="By Students, For Students - University Radio York"
+output_device=/dev/ttyUSB0
+wait_seconds=30
 max_msg_length=64
 
 pid_file=/tmp/radiotext.pid
@@ -72,6 +72,7 @@ display_messages () {
 
 now_playing () {
     # TODO - null track
+    # TODO - on air/off air distinction
     now_playing_msg="Now Playing:  $(myradio_api_request "track/nowplaying?allowOffAir=true" | jq -r '(.track.title + " - " + .track.artist)')"
     
     while read line; do
@@ -83,7 +84,7 @@ now_playing () {
 on_air_show () {
     # TODO - what if it's jukebox/off air
     # TODO - next show at 10 to the hour?
-    on_air_text="On Air: $(myradio_api_request "timeslot/currentandnext?n=1" | jq -r '(.next.title + " with " + .next.presenters)')"
+    on_air_text="On Air Next: $(myradio_api_request "timeslot/currentandnext?n=1" | jq -r '(.next.title + " with " + .next.presenters)')"
 
     while read line; do
         output_text $line
