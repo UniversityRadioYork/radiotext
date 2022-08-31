@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
+# URY Radio Text Controller
+# Copyright (C) 2022 - University Radio York
+# Author: Michael Grace <michael.grace@ury.org.uk>
+
 set -euo pipefail
 
 default_text="By Students, For Students - University Radio York"
-output_device=/dev/ttyUSB0
-wait_seconds=30
+output_device=/dev/null
+wait_seconds=10
 max_msg_length=64
 
 pid_file=/tmp/radiotext.pid
@@ -54,9 +58,14 @@ output_text () {
 
 myradio_api_request () {
     local endpoint=$1
-    # TODO ? or & for api_key
+    if [[ $(echo $endpoint | grep "?") == "" ]]; then
+        endpoint_with_key="$endpoint?api_key=$(cat $api_key_file)"
+    else
+        endpoint_with_key="$endpoint&api_key=$(cat $api_key_file)"
+    fi
+    
     # TODO deal with failed auth
-    curl "$api_base_url/$endpoint&api_key=$(cat $api_key_file)" 2>/dev/null | jq .payload
+    curl "$api_base_url/$endpoint_with_key" 2>/dev/null | jq .payload
 }
 
 display_messages () {
@@ -70,10 +79,16 @@ display_messages () {
     done < $messages_file
 }
 
+off_air () {
+    myradio_api_request "scheduler/isterm" | jq -r '. | not'
+}
+
 now_playing () {
-    # TODO - null track
-    # TODO - on air/off air distinction
-    now_playing_msg="Now Playing:  $(myradio_api_request "track/nowplaying?allowOffAir=true" | jq -r '(.track.title + " - " + .track.artist)')"
+    
+    np=$(myradio_api_request "track/nowplaying?allowOffAir=$(off_air)")
+    [[ $np == "null" ]] && return
+
+    now_playing_msg="Now Playing:  $(echo $np | jq -r '(.track.title + " - " + .track.artist)')"
     
     while read line; do
         output_text $line
@@ -84,7 +99,8 @@ now_playing () {
 on_air_show () {
     # TODO - what if it's jukebox/off air
     # TODO - next show at 10 to the hour?
-    on_air_text="On Air Next: $(myradio_api_request "timeslot/currentandnext?n=1" | jq -r '(.next.title + " with " + .next.presenters)')"
+    on_air_text="On Air Next: $(myradio_api_request "timeslot/currentandnext?n=1" \
+        | jq -r '(.next.title + " with " + .next.presenters)')"
 
     while read line; do
         output_text $line
@@ -93,6 +109,7 @@ on_air_show () {
 }
 
 daemon () {
+    # TODO 'URY News' on the hour
     while true; do
         display_messages
         now_playing
@@ -113,7 +130,9 @@ start_daemon () {
 }
 
 stop_daemon () {
-    kill $(cat $pid_file)
+    set +e
+    kill $(cat $pid_file) > /dev/null 2>&1
+    set -e
     rm $pid_file
     output_text $default_text
 }
