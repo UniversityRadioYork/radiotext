@@ -1,0 +1,8 @@
+---
+defaultMessage: "By Students, For Students - University Radio York"
+waitTime: 30
+maxTextLength: 64
+
+SSHHost: host
+SSHUser: user
+SSHPass: pass
