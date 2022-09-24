@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -14,43 +13,28 @@ import (
 
 type SSHSession struct {
 	config  common.Config
+	sshConf ssh.ClientConfig
 	conn    *ssh.Client
 	session *ssh.Session
 	stdin   io.WriteCloser
 }
 
 func OpenSSHConnection(config common.Config) (*SSHSession, error) {
-	conf := &ssh.ClientConfig{
-		User:            config.SSHUser,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Auth:            []ssh.AuthMethod{ssh.Password(config.SSHPass)},
+	s := SSHSession{
+		config: config,
+		sshConf: ssh.ClientConfig{
+			User:            config.SSHUser,
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Auth:            []ssh.AuthMethod{ssh.Password(config.SSHPass)},
+		},
 	}
 
-	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:22", config.SSHHost), conf)
-	if err != nil {
+	if err := s.createConnection(); err != nil {
 		return nil, err
 	}
 
-	session, err := conn.NewSession()
-	if err != nil {
-		return nil, err
-	}
+	return &s, nil
 
-	stdin, err := session.StdinPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	if err = session.Shell(); err != nil {
-		return nil, err
-	}
-
-	return &SSHSession{
-		config:  config,
-		conn:    conn,
-		session: session,
-		stdin:   stdin,
-	}, nil
 }
 
 func (s *SSHSession) Close() {
@@ -58,34 +42,44 @@ func (s *SSHSession) Close() {
 	s.session.Close()
 }
 
-func splitMessageToLength(msg string, length int) []string {
-	var splits []string
+func (s *SSHSession) createConnection() error {
+	fmt.Println("connecting SSH")
 
-	var subMsg string
-	for _, word := range strings.Split(msg, " ") {
-		var checkMsg string
-		if len(subMsg) == 0 {
-			checkMsg = word
-		} else {
-			checkMsg = fmt.Sprintf("%s %s", subMsg, word)
-		}
-
-		if len(checkMsg) <= length {
-			subMsg = checkMsg
-		} else {
-			splits = append(splits, subMsg)
-			subMsg = word
-		}
+	var err error
+	s.conn, err = ssh.Dial("tcp", fmt.Sprintf("%s:22", s.config.SSHHost), &s.sshConf)
+	if err != nil {
+		return err
 	}
-	splits = append(splits, subMsg)
-	return splits
+
+	s.session, err = s.conn.NewSession()
+	if err != nil {
+		return err
+	}
+
+	s.stdin, err = s.session.StdinPipe()
+	if err != nil {
+		return err
+	}
+
+	if err = s.session.Shell(); err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 func (s *SSHSession) OutputRadioTextMessage(msg string) {
-	for _, output := range splitMessageToLength(msg, s.config.MaxTextLength) {
+	for _, output := range common.SplitMessageToLength(msg, s.config.MaxTextLength) {
 		log.Println(output)
 		_, err := s.stdin.Write([]byte(fmt.Sprintf("echo -ne \"%v\\f\" > /dev/ttyUSB0\n", output)))
 		if err != nil {
+			if err.Error() == "EOF" {
+				s.createConnection()
+				s.OutputRadioTextMessage(msg)
+				return
+			}
+
 			fmt.Println(err)
 		}
 
