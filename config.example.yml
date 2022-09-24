@@ -3,6 +3,8 @@ defaultMessage: "By Students, For Students - University Radio York"
 waitTime: 30
 maxTextLength: 64
 
+apiKey: key
+
 SSHHost: host
 SSHUser: user
 SSHPass: pass

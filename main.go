@@ -34,7 +34,7 @@ func main() {
 	env := data.Env{}
 
 	// Create MyRadio Session
-	env.MyRadioSession, err = myradio.NewSessionFromKeyFile()
+	env.MyRadioSession, err = myradio.NewSession(config.APIKey)
 	if err != nil {
 		panic(err)
 	}

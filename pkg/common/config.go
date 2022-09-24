@@ -5,6 +5,8 @@ type Config struct {
 	WaitTime       int    `yaml:"waitTime"`
 	MaxTextLength  int    `yaml:"maxTextLength"`
 
+	APIKey string `yaml:"apiKey"`
+
 	SSHHost string `yaml:"SSHHost"`
 	SSHUser string `yaml:"SSHUser"`
 	SSHPass string `yaml:"SSHPass"`
