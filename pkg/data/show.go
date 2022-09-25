@@ -38,7 +38,7 @@ func (s *RadiotextSession) NextShowHandler() error {
 
 	nextShow := currentAndNext.Next
 
-	if nextShow.Id == 0 || nextShow.StartTime.Before(
+	if nextShow.Id == 0 || nextShow.StartTime.After(
 		time.Now().Add(time.Duration(10)*time.Minute),
 	) {
 		return ErrNoShowSoon
