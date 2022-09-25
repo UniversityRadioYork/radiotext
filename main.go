@@ -46,10 +46,13 @@ func main() {
 	}
 	defer session.SSHSession.Close()
 
+	// URY News
+	go session.URYNewsHandler()
+
 	// Loop Over Entries and Output
 	for {
 		// Default Message
-		session.OutputRadioTextMessage(config.DefaultMessage)
+		session.OutputRadioTextMessage(config.DefaultMessage, false)
 
 		// Custom Message
 		// TODO
@@ -57,20 +60,19 @@ func main() {
 		// Now Playing
 		if err := session.OutputNowPlaying(); err != nil {
 			if !errors.Is(err, data.ErrNoNowPlaying) {
-				session.OutputRadioTextMessage(config.DefaultMessage)
+				session.OutputRadioTextMessage(config.DefaultMessage, false)
 			}
 		}
 
 		// On Air Show
 		if err := session.OutputOnAirShow(); err != nil {
 			if !errors.Is(err, data.ErrNoShow) {
-				session.OutputRadioTextMessage(config.DefaultMessage)
+				session.OutputRadioTextMessage(config.DefaultMessage, false)
 			}
 		}
 
 		// Future TODO:
 		// On Air Next
-		// URY News
 
 	}
 }

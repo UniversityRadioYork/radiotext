@@ -26,7 +26,10 @@ func (s *RadiotextSession) OutputNowPlaying() error {
 		return err
 	}
 
-	s.OutputRadioTextMessage(fmt.Sprintf("Now Playing: %v - %v", nowPlaying.Title, nowPlaying.Artist))
+	s.OutputRadioTextMessage(
+		fmt.Sprintf("Now Playing: %v - %v", nowPlaying.Title, nowPlaying.Artist),
+		false,
+	)
 
 	return nil
 }

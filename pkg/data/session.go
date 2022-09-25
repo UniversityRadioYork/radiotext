@@ -13,9 +13,23 @@ import (
 type RadiotextSession struct {
 	SSHSession     *ssh.SSHSession
 	MyRadioSession *myradio.Session
+
+	OutputMessage     string
+	PriorityWriteLock bool
 }
 
-func (s *RadiotextSession) OutputRadioTextMessage(msg string) {
+func (s *RadiotextSession) OutputRadioTextMessage(msg string, highPriority bool) {
+	if !highPriority {
+		// if we're in a high priority write lock, and we get
+		// a low priority message, we'll just store it so we
+		// can refer to it later once the high priority message is over
+		s.OutputMessage = msg
+
+		if s.PriorityWriteLock {
+			return
+		}
+	}
+
 	for _, output := range common.SplitMessageToLength(msg, s.SSHSession.Config.MaxTextLength) {
 		log.Println(output)
 		_, err := s.SSHSession.Stdin.Write([]byte(
@@ -30,7 +44,7 @@ func (s *RadiotextSession) OutputRadioTextMessage(msg string) {
 			if err.Error() == "EOF" {
 				s.SSHSession.Close()
 				s.SSHSession.CreateConnection()
-				s.OutputRadioTextMessage(msg)
+				s.OutputRadioTextMessage(msg, highPriority)
 				return
 			}
 

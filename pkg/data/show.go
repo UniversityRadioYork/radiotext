@@ -20,7 +20,10 @@ func (s *RadiotextSession) OutputOnAirShow() error {
 		return ErrNoShow
 	}
 
-	s.OutputRadioTextMessage(fmt.Sprintf("On Air: %v with %v", currentShow.Title, currentShow.Presenters))
+	s.OutputRadioTextMessage(
+		fmt.Sprintf("On Air: %v with %v", currentShow.Title, currentShow.Presenters),
+		false,
+	)
 
 	return nil
 }
