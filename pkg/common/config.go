@@ -7,7 +7,8 @@ type Config struct {
 
 	APIKey string `yaml:"apiKey"`
 
-	SSHHost string `yaml:"SSHHost"`
-	SSHUser string `yaml:"SSHUser"`
-	SSHPass string `yaml:"SSHPass"`
+	SSHHost      string `yaml:"SSHHost"`
+	SSHUser      string `yaml:"SSHUser"`
+	SSHPass      string `yaml:"SSHPass"`
+	OutputDevice string `yaml:"outputDevice"`
 }

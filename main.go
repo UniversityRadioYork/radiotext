@@ -31,40 +31,40 @@ func main() {
 		panic(err)
 	}
 
-	env := data.Env{}
+	var session data.RadiotextSession
 
 	// Create MyRadio Session
-	env.MyRadioSession, err = myradio.NewSession(config.APIKey)
+	session.MyRadioSession, err = myradio.NewSession(config.APIKey)
 	if err != nil {
 		panic(err)
 	}
 
 	// Create SSH Session
-	env.SSHSession, err = ssh.OpenSSHConnection(config)
+	session.SSHSession, err = ssh.OpenSSHConnection(config)
 	if err != nil {
 		panic(err)
 	}
-	defer env.SSHSession.Close()
+	defer session.SSHSession.Close()
 
 	// Loop Over Entries and Output
 	for {
 		// Default Message
-		env.SSHSession.OutputRadioTextMessage(config.DefaultMessage)
+		session.OutputRadioTextMessage(config.DefaultMessage)
 
 		// Custom Message
 		// TODO
 
 		// Now Playing
-		if err := env.OutputNowPlaying(); err != nil {
+		if err := session.OutputNowPlaying(); err != nil {
 			if !errors.Is(err, data.ErrNoNowPlaying) {
-				env.SSHSession.OutputRadioTextMessage(config.DefaultMessage)
+				session.OutputRadioTextMessage(config.DefaultMessage)
 			}
 		}
 
 		// On Air Show
-		if err := env.OutputOnAirShow(); err != nil {
+		if err := session.OutputOnAirShow(); err != nil {
 			if !errors.Is(err, data.ErrNoShow) {
-				env.SSHSession.OutputRadioTextMessage(config.DefaultMessage)
+				session.OutputRadioTextMessage(config.DefaultMessage)
 			}
 		}
 

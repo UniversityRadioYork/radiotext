@@ -8,3 +8,4 @@ apiKey: key
 SSHHost: host
 SSHUser: user
 SSHPass: pass
+outputDevice: "/dev/ttyUSB0"

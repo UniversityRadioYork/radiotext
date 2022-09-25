@@ -8,8 +8,8 @@ var (
 	ErrNoShow = fmt.Errorf("not a show")
 )
 
-func (e *Env) OutputOnAirShow() error {
-	currentAndNext, err := e.MyRadioSession.GetCurrentAndNext()
+func (s *RadiotextSession) OutputOnAirShow() error {
+	currentAndNext, err := s.MyRadioSession.GetCurrentAndNext()
 	if err != nil {
 		return err
 	}
@@ -20,7 +20,7 @@ func (e *Env) OutputOnAirShow() error {
 		return ErrNoShow
 	}
 
-	e.SSHSession.OutputRadioTextMessage(fmt.Sprintf("On Air: %v with %v", currentShow.Title, currentShow.Presenters))
+	s.OutputRadioTextMessage(fmt.Sprintf("On Air: %v with %v", currentShow.Title, currentShow.Presenters))
 
 	return nil
 }

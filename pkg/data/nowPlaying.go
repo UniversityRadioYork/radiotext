@@ -10,13 +10,13 @@ var (
 	ErrNoNowPlaying = fmt.Errorf("nothing now playing")
 )
 
-func (e *Env) OutputNowPlaying() error {
-	selectorInfo, err := e.MyRadioSession.GetSelectorInfo()
+func (s *RadiotextSession) OutputNowPlaying() error {
+	selectorInfo, err := s.MyRadioSession.GetSelectorInfo()
 	if err != nil {
 		return err
 	}
 
-	nowPlaying, err := e.MyRadioSession.GetNowPlaying(selectorInfo.Studio == myradio.SelectorOffAir)
+	nowPlaying, err := s.MyRadioSession.GetNowPlaying(selectorInfo.Studio == myradio.SelectorOffAir)
 
 	if nowPlaying.ID == 0 {
 		return ErrNoNowPlaying
@@ -26,7 +26,7 @@ func (e *Env) OutputNowPlaying() error {
 		return err
 	}
 
-	e.SSHSession.OutputRadioTextMessage(fmt.Sprintf("Now Playing: %v - %v", nowPlaying.Title, nowPlaying.Artist))
+	s.OutputRadioTextMessage(fmt.Sprintf("Now Playing: %v - %v", nowPlaying.Title, nowPlaying.Artist))
 
 	return nil
 }
