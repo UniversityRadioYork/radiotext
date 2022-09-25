@@ -18,7 +18,7 @@ func (s *RadiotextSession) URYNewsHandler() {
 				isNews = true
 				s.PriorityWriteLock = true
 				s.OutputRadioTextMessage(
-					fmt.Sprintf("URY News at %v", now.Hour()), true)
+					fmt.Sprintf("URY News at %v", now.Format("3")), true)
 			}
 		} else {
 			if now.Minute() >= 2 {
