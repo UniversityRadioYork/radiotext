@@ -57,13 +57,6 @@ func main() {
 		// Custom Message
 		// TODO
 
-		// Now Playing
-		if err := session.OutputNowPlaying(); err != nil {
-			if !errors.Is(err, data.ErrNoNowPlaying) {
-				session.OutputRadioTextMessage(config.DefaultMessage, false)
-			}
-		}
-
 		// On Air Show
 		if err := session.OutputOnAirShow(); err != nil {
 			if !errors.Is(err, data.ErrNoShow) {
@@ -71,8 +64,19 @@ func main() {
 			}
 		}
 
-		// Future TODO:
+		// Now Playing
+		if err := session.OutputNowPlaying(); err != nil {
+			if !errors.Is(err, data.ErrNoNowPlaying) {
+				session.OutputRadioTextMessage(config.DefaultMessage, false)
+			}
+		}
+
 		// On Air Next
+		if err := session.NextShowHandler(); err != nil {
+			if !errors.Is(err, data.ErrNoShowSoon) {
+				session.OutputRadioTextMessage(config.DefaultMessage, false)
+			}
+		}
 
 	}
 }
