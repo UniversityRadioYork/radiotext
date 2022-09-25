@@ -26,6 +26,7 @@ func (s *RadiotextSession) OutputRadioTextMessage(msg string, highPriority bool)
 		s.OutputMessage = msg
 
 		if s.PriorityWriteLock {
+			time.Sleep(time.Duration(s.SSHSession.Config.WaitTime) * time.Second)
 			return
 		}
 	}
