@@ -7,7 +7,6 @@ Author: Michael Grace <michael.grace@ury.org.uk>
 package main
 
 import (
-	"errors"
 	"os"
 
 	"github.com/UniversityRadioYork/myradio-go"
@@ -59,23 +58,17 @@ func main() {
 
 		// On Air Show
 		if err := session.OutputOnAirShow(); err != nil {
-			if !errors.Is(err, data.ErrNoShow) {
-				session.OutputRadioTextMessage(config.DefaultMessage, false)
-			}
+			session.OutputRadioTextMessage(config.DefaultMessage, false)
 		}
 
 		// Now Playing
 		if err := session.OutputNowPlaying(); err != nil {
-			if !errors.Is(err, data.ErrNoNowPlaying) {
-				session.OutputRadioTextMessage(config.DefaultMessage, false)
-			}
+			session.OutputRadioTextMessage(config.DefaultMessage, false)
 		}
 
 		// On Air Next
 		if err := session.NextShowHandler(); err != nil {
-			if !errors.Is(err, data.ErrNoShowSoon) {
-				session.OutputRadioTextMessage(config.DefaultMessage, false)
-			}
+			session.OutputRadioTextMessage(config.DefaultMessage, false)
 		}
 
 	}

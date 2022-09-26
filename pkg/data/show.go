@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-var (
-	ErrNoShow     = fmt.Errorf("not a show")
-	ErrNoShowSoon = fmt.Errorf("no show soon")
-)
-
 func (s *RadiotextSession) OutputOnAirShow() error {
 	currentAndNext, err := s.MyRadioSession.GetCurrentAndNext()
 	if err != nil {
@@ -19,7 +14,8 @@ func (s *RadiotextSession) OutputOnAirShow() error {
 	currentShow := currentAndNext.Current
 
 	if currentShow.Id == 0 {
-		return ErrNoShow
+		// No Current Showw
+		return nil
 	}
 
 	s.OutputRadioTextMessage(
@@ -41,7 +37,8 @@ func (s *RadiotextSession) NextShowHandler() error {
 	if nextShow.Id == 0 || nextShow.StartTime.After(
 		time.Now().Add(time.Duration(10)*time.Minute),
 	) {
-		return ErrNoShowSoon
+		// Not going to show it yet
+		return nil
 	}
 
 	s.OutputRadioTextMessage(

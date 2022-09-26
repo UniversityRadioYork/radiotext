@@ -6,10 +6,6 @@ import (
 	"github.com/UniversityRadioYork/myradio-go"
 )
 
-var (
-	ErrNoNowPlaying = fmt.Errorf("nothing now playing")
-)
-
 func (s *RadiotextSession) OutputNowPlaying() error {
 	selectorInfo, err := s.MyRadioSession.GetSelectorInfo()
 	if err != nil {
@@ -19,7 +15,8 @@ func (s *RadiotextSession) OutputNowPlaying() error {
 	nowPlaying, err := s.MyRadioSession.GetNowPlaying(selectorInfo.Studio == myradio.SelectorOffAir)
 
 	if nowPlaying.ID == 0 {
-		return ErrNoNowPlaying
+		// No Now Playing Info
+		return nil
 	}
 
 	if err != nil {
