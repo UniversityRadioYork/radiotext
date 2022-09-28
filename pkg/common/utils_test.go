@@ -40,11 +40,12 @@ func TestToAscii(t *testing.T) {
 	}
 
 	for _, c := range tests {
-		if result, err := ToAscii(c.input); err != nil {
+		result, err := ToAscii(c.input)
+		if err != nil {
 			t.Errorf(err.Error())
-			if result != c.expected {
-				t.Errorf("%v became %v not %v", c.input, result, c.expected)
-			}
+		}
+		if result != c.expected {
+			t.Errorf("%v became %v not %v", c.input, result, c.expected)
 		}
 	}
 }
