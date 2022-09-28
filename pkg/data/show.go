@@ -2,8 +2,19 @@ package data
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
+
+func withInTitle(title string) bool {
+	for _, word := range strings.Split(title, " ") {
+		if word == "with" {
+			return true
+		}
+	}
+
+	return false
+}
 
 func (s *RadiotextSession) OutputOnAirShow() error {
 	currentAndNext, err := s.MyRadioSession.GetCurrentAndNext()
@@ -18,8 +29,13 @@ func (s *RadiotextSession) OutputOnAirShow() error {
 		return nil
 	}
 
+	onAirMessage := fmt.Sprintf("On Air: %v", currentShow.Title)
+	if !withInTitle(currentShow.Title) {
+		onAirMessage = fmt.Sprintf("%v with %v", onAirMessage, currentShow.Presenters)
+	}
+
 	s.OutputRadioTextMessage(
-		fmt.Sprintf("On Air: %v with %v", currentShow.Title, currentShow.Presenters),
+		onAirMessage,
 		false,
 	)
 
@@ -41,8 +57,13 @@ func (s *RadiotextSession) NextShowHandler() error {
 		return nil
 	}
 
+	comingUpMessage := fmt.Sprintf("Coming Up: %v", nextShow.Title)
+	if !withInTitle(nextShow.Title) {
+		comingUpMessage = fmt.Sprintf("%v with %v", comingUpMessage, nextShow.Presenters)
+	}
+
 	s.OutputRadioTextMessage(
-		fmt.Sprintf("Coming Up: %v with %v", nextShow.Title, nextShow.Presenters),
+		comingUpMessage,
 		false,
 	)
 
