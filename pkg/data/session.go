@@ -19,6 +19,14 @@ type RadiotextSession struct {
 }
 
 func (s *RadiotextSession) OutputRadioTextMessage(msg string, highPriority bool) {
+	var fullyOutputed bool
+
+	defer func() {
+		if !fullyOutputed {
+			time.Sleep(time.Duration(s.SSHSession.Config.WaitTime) * time.Second)
+		}
+	}()
+
 	if !highPriority {
 		// if we're in a high priority write lock, and we get
 		// a low priority message, we'll just store it so we
@@ -26,10 +34,16 @@ func (s *RadiotextSession) OutputRadioTextMessage(msg string, highPriority bool)
 		s.OutputMessage = msg
 
 		if s.PriorityWriteLock {
-			time.Sleep(time.Duration(s.SSHSession.Config.WaitTime) * time.Second)
 			return
 		}
 	}
+
+	m, err := common.ToAscii(msg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	msg = m
 
 	for _, output := range common.SplitMessageToLength(msg, s.SSHSession.Config.MaxTextLength) {
 		log.Println(output)
@@ -54,4 +68,6 @@ func (s *RadiotextSession) OutputRadioTextMessage(msg string, highPriority bool)
 
 		time.Sleep(time.Duration(s.SSHSession.Config.WaitTime) * time.Second)
 	}
+
+	fullyOutputed = true
 }
