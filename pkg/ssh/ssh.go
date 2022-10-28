@@ -65,7 +65,7 @@ func (s *SSHSession) CreateConnection() error {
 
 	if _, err := s.Stdin.Write([]byte(
 		fmt.Sprintf(
-			"sudo stty -F %s 9600 -ixoff -ixon -cread clocal",
+			"sudo stty -F %s 9600 -ixoff -ixon -cread clocal\n",
 			s.Config.OutputDevice,
 		),
 	)); err != nil {
