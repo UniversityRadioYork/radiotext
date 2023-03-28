@@ -40,4 +40,6 @@ func (s *RadiotextSession) OutputRosesData(rosesAPI string) error {
 		return ErrNoRosesLive
 	}
 
+	return nil
+
 }
