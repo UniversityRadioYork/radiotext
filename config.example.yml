@@ -9,3 +9,5 @@ SSHHost: host
 SSHUser: user
 SSHPass: pass
 outputDevice: "/dev/ttyUSB0"
+
+rosesAPI: "https://roses.co.uk/api"

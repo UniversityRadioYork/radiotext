@@ -7,6 +7,7 @@ Author: Michael Grace <michael.grace@ury.org.uk>
 package main
 
 import (
+	"errors"
 	"os"
 
 	"github.com/UniversityRadioYork/myradio-go"
@@ -60,6 +61,9 @@ func main() {
 		if err := session.OutputOnAirShow(); err != nil {
 			session.OutputRadioTextMessage(config.DefaultMessage, false)
 		}
+
+		// Roses
+		session.OutputRosesData(config.RosesAPI)
 
 		// Now Playing
 		if err := session.OutputNowPlaying(); err != nil {

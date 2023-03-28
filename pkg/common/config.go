@@ -11,4 +11,6 @@ type Config struct {
 	SSHUser      string `yaml:"SSHUser"`
 	SSHPass      string `yaml:"SSHPass"`
 	OutputDevice string `yaml:"outputDevice"`
+
+	RosesAPI string `yaml:"rosesAPI"`
 }
