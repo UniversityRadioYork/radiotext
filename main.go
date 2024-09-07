@@ -7,6 +7,7 @@ Author: Michael Grace <michael.grace@ury.org.uk>
 package main
 
 import (
+	"flag"
 	"os"
 
 	"github.com/UniversityRadioYork/myradio-go"
@@ -18,6 +19,9 @@ import (
 )
 
 func main() {
+	dontDoSSHSession := flag.Bool("n", false, "do not start a ssh session")
+	flag.Parse()
+
 	// Load Config
 	var config common.Config
 
@@ -39,11 +43,17 @@ func main() {
 	}
 
 	// Create SSH Session
-	session.SSHSession, err = ssh.OpenSSHConnection(config)
-	if err != nil {
-		panic(err)
+	if !*dontDoSSHSession {
+		session.SSHSession, err = ssh.OpenSSHConnection(config)
+		if err != nil {
+			panic(err)
+		}
+		defer session.SSHSession.Close()
+	} else {
+		session.SSHSession = &ssh.SSHSession{
+			Config: config,
+		}
 	}
-	defer session.SSHSession.Close()
 
 	// URY News
 	go session.URYNewsHandler()

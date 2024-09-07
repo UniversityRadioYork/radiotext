@@ -10,16 +10,18 @@ import (
 )
 
 type SSHSession struct {
-	Config  common.Config
-	sshConf ssh.ClientConfig
-	conn    *ssh.Client
-	session *ssh.Session
-	Stdin   io.WriteCloser
+	DoConnection bool
+	Config       common.Config
+	sshConf      ssh.ClientConfig
+	conn         *ssh.Client
+	session      *ssh.Session
+	Stdin        io.WriteCloser
 }
 
 func OpenSSHConnection(config common.Config) (*SSHSession, error) {
 	s := SSHSession{
-		Config: config,
+		Config:       config,
+		DoConnection: true,
 		sshConf: ssh.ClientConfig{
 			User:            config.SSHUser,
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),

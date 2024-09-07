@@ -2,6 +2,8 @@
 defaultMessage: "By Students, For Students - University Radio York"
 waitTime: 30
 maxTextLength: 64
+endpointForRunningCheck: "http://localhost:5001/v2/programmedata"
+runningCheckKey: "fm"
 
 apiKey: key
 
